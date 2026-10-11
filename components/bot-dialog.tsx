@@ -68,8 +68,18 @@ function emptyBot(): BotFormValues {
   return { name: "", avatar: nanoid(), job: "", instruction: "" }
 }
 
-function BotDialog({ children }: { children: React.ReactNode }) {
-  const [open, setOpen] = React.useState(false)
+function BotDialog({
+  children,
+  open: openProp,
+  onOpenChange,
+}: {
+  children?: React.ReactNode
+  open?: boolean
+  onOpenChange?: (open: boolean) => void
+}) {
+  const [uncontrolledOpen, setUncontrolledOpen] = React.useState(false)
+  const open = openProp ?? uncontrolledOpen
+  const setOpen = onOpenChange ?? setUncontrolledOpen
   const [isPending, startTransition] = React.useTransition()
 
   const form = useForm({
@@ -94,9 +104,11 @@ function BotDialog({ children }: { children: React.ReactNode }) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger render={<Button variant="secondary" />}>
-        {children}
-      </DialogTrigger>
+      {children && (
+        <DialogTrigger render={<Button variant="secondary" />}>
+          {children}
+        </DialogTrigger>
+      )}
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>New bot</DialogTitle>
