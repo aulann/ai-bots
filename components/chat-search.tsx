@@ -16,6 +16,11 @@ import {
   CommandList,
 } from "@/components/ui/command"
 import { Kbd, KbdGroup } from "@/components/ui/kbd"
+import {
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+} from "@/components/ui/sidebar"
 import type { ChatListItem } from "@/queries/bots"
 
 export function ChatSearch({ chats }: { chats: ChatListItem[] }) {
@@ -37,7 +42,7 @@ export function ChatSearch({ chats }: { chats: ChatListItem[] }) {
     <>
       <Button
         variant="outline"
-        className="h-8 w-full min-w-0 justify-start rounded-lg border border-input bg-transparent px-2.5 py-1 text-base font-normal text-muted-foreground transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-input/50 disabled:opacity-50 md:text-sm dark:bg-input/30 dark:disabled:bg-input/80"
+        className="h-8 w-full group-data-[collapsible=icon]:hidden min-w-0 justify-start rounded-lg border border-input bg-transparent px-2.5 py-1 text-base font-normal text-muted-foreground transition-colors outline-none focus-visible:border-ring focus-visible:ring-3 focus-visible:ring-ring/50 disabled:pointer-events-none disabled:cursor-not-allowed disabled:bg-input/50 disabled:opacity-50 md:text-sm dark:bg-input/30 dark:disabled:bg-input/80"
         onClick={() => setOpen(true)}
       >
         <SearchIcon data-icon="inline-start" />
@@ -47,6 +52,14 @@ export function ChatSearch({ chats }: { chats: ChatListItem[] }) {
           <Kbd>K</Kbd>
         </KbdGroup>
       </Button>
+      <SidebarMenu className="hidden group-data-[collapsible=icon]:flex">
+        <SidebarMenuItem>
+          <SidebarMenuButton tooltip="Search" onClick={() => setOpen(true)}>
+            <SearchIcon />
+            <span>Search</span>
+          </SidebarMenuButton>
+        </SidebarMenuItem>
+      </SidebarMenu>
       <CommandDialog
         open={open}
         onOpenChange={setOpen}

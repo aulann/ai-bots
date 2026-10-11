@@ -16,6 +16,7 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
+  SidebarRail,
 } from "@/components/ui/sidebar"
 import { getChats } from "@/queries/bots"
 
@@ -23,9 +24,9 @@ export async function AppSidebar() {
   const chats = await getChats()
 
   return (
-    <Sidebar>
+    <Sidebar collapsible="icon">
       <SidebarHeader>
-        <div className="flex justify-end">
+        <div className="flex justify-end group-data-[collapsible=icon]:justify-center">
           <NewChatMenu />
         </div>
         <ChatSearch chats={chats} />
@@ -34,21 +35,23 @@ export async function AppSidebar() {
         <SidebarGroup>
           <SidebarGroupLabel>Chats</SidebarGroupLabel>
           <SidebarGroupContent>
-            <SidebarMenu>
+            <SidebarMenu className="gap-1">
               {chats.map((chat) => {
                 // Group chats aren't handled yet, so fall back to the first bot.
                 const bot = chat.members[0]?.bot
+                const name = chat.name ?? bot?.name
                 return (
                   <SidebarMenuItem key={chat.id}>
                     <SidebarMenuButton
                       size="lg"
+                      tooltip={name}
                       render={<Link href={`/chats/${chat.id}`} />}
                     >
                       <ChatAvatar seed={bot?.avatar ?? chat.id} />
                       <div className="grid min-w-0 flex-1 gap-0.5">
                         <div className="flex items-baseline justify-between gap-2">
                           <span className="truncate font-medium">
-                            {chat.name ?? bot?.name}
+                            {name}
                           </span>
                           <span className="shrink-0 text-xs text-muted-foreground">
                             {formatDistanceToNowStrict(chat.lastMessageAt)}
@@ -71,6 +74,7 @@ export async function AppSidebar() {
       <SidebarFooter>
         <NavUser />
       </SidebarFooter>
+      <SidebarRail />
     </Sidebar>
   )
 }

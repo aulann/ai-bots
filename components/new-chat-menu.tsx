@@ -19,7 +19,13 @@ export function NewChatMenu() {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger
-          render={<Button variant="ghost" size="icon-sm" />}
+          render={
+            <Button
+              variant="ghost"
+              size="icon-sm"
+              className="group-data-[collapsible=icon]:size-10"
+            />
+          }
           aria-label="New"
         >
           <PlusIcon />
