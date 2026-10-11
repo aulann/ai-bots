@@ -6,13 +6,17 @@ import { revalidatePath } from "next/cache"
 import { db } from "@/lib/db"
 import {
   bots,
+  chatMembers,
+  chats,
   insertBotSchema,
   type Bot,
+  type Chat,
   type InsertBot,
 } from "@/lib/db/schema"
 
 type CreateBotResult =
-  { success: true; bot: Bot } | { success: false; error: string }
+  | { success: true; bot: Bot; chat: Chat }
+  | { success: false; error: string }
 
 export async function createBot(input: InsertBot): Promise<CreateBotResult> {
   const { userId } = await auth.protect()
@@ -25,16 +29,28 @@ export async function createBot(input: InsertBot): Promise<CreateBotResult> {
     }
   }
 
-  const [bot] = await db
-    .insert(bots)
-    .values({
-      ...parsed.data,
-      instruction: parsed.data.instruction || null,
-      userId,
-    })
-    .returning()
+  // Every bot starts with a direct chat. Create all three rows or none.
+  const { bot, chat } = await db.transaction(async (tx) => {
+    const [bot] = await tx
+      .insert(bots)
+      .values({
+        ...parsed.data,
+        instruction: parsed.data.instruction || null,
+        userId,
+      })
+      .returning()
+
+    const [chat] = await tx
+      .insert(chats)
+      .values({ userId, kind: "direct" })
+      .returning()
+
+    await tx.insert(chatMembers).values({ chatId: chat.id, botId: bot.id })
+
+    return { bot, chat }
+  })
 
   revalidatePath("/")
 
-  return { success: true, bot }
+  return { success: true, bot, chat }
 }

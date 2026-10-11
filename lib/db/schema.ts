@@ -73,15 +73,15 @@ export const chats = pgTable(
       .primaryKey()
       .$defaultFn(() => nanoid()),
     // Clerk user ID
-    userId: text().notNull(),
+    userId: text("user_id").notNull(),
     kind: chatKind().notNull().default("direct"),
     // Null for direct chats, which use the bot's name
     name: text(),
-    lastMessagePreview: text(),
-    lastMessageAt: timestamp({ withTimezone: true })
+    lastMessagePreview: text("last_message_preview"),
+    lastMessageAt: timestamp("last_message_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
-    createdAt: timestamp({ withTimezone: true })
+    createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
   },
@@ -94,13 +94,13 @@ export type NewChat = typeof chats.$inferInsert
 export const chatMembers = pgTable(
   "chat_members",
   {
-    chatId: text()
+    chatId: text("chat_id")
       .notNull()
       .references(() => chats.id, { onDelete: "cascade" }),
-    botId: text()
+    botId: text("bot_id")
       .notNull()
       .references(() => bots.id, { onDelete: "cascade" }),
-    joinedAt: timestamp({ withTimezone: true })
+    joinedAt: timestamp("joined_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
   },
