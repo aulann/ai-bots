@@ -1,7 +1,7 @@
-import Link from "next/link"
 import { formatDistanceToNowStrict } from "date-fns"
 
 import { ChatAvatar } from "@/components/chat-avatar"
+import { ChatMenuButton } from "@/components/chat-menu-button"
 import { ChatSearch } from "@/components/chat-search"
 import { NavUser } from "@/components/nav-user"
 import { NewChatMenu } from "@/components/new-chat-menu"
@@ -14,7 +14,6 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
-  SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
 } from "@/components/ui/sidebar"
@@ -42,11 +41,7 @@ export async function AppSidebar() {
                 const name = chat.name ?? bot?.name
                 return (
                   <SidebarMenuItem key={chat.id}>
-                    <SidebarMenuButton
-                      size="lg"
-                      tooltip={name}
-                      render={<Link href={`/chats/${chat.id}`} />}
-                    >
+                    <ChatMenuButton chatId={chat.id} size="lg" tooltip={name}>
                       <ChatAvatar seed={bot?.avatar ?? chat.id} />
                       <div className="grid min-w-0 flex-1 gap-0.5">
                         <div className="flex items-baseline justify-between gap-2">
@@ -63,7 +58,7 @@ export async function AppSidebar() {
                           </span>
                         )}
                       </div>
-                    </SidebarMenuButton>
+                    </ChatMenuButton>
                   </SidebarMenuItem>
                 )
               })}
