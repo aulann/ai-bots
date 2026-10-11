@@ -18,6 +18,24 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - Apply schema changes only with `npm run db:push` (`drizzle-kit push`). Never generate or run migrations (`drizzle-kit generate`, `drizzle-kit migrate`, or migration files/folders).
 - This is a development project. There is no backwards compatibility and the data is worthless. Prefer data loss: never backfill, migrate, or preserve existing rows, and never spend effort on keeping old data working. Every schema change means a clean slate.
 
+## Forms
+
+Reference implementation: `lib/db/schema.ts` (`insertBotSchema`), `actions/bot.ts` (`createBot`), `components/bot-dialog.tsx`.
+
+- **One schema, shared by client and server.** Generate it from the Drizzle table with `createInsertSchema` from `drizzle-zod`, next to the table in `lib/db/schema.ts`. Name it `insert<Table>Schema` and export its type (`z.infer`). Never hand-write a parallel Zod schema for a table.
+- **Refine and narrow in the schema.** Put trim, length limits and user-facing error messages in the refinement callbacks, e.g. `name: (s) => s.trim().min(1, "Give your bot a name.")`. Then `.pick()` only the fields the user fills in. Server-owned fields (`id`, `userId`, `createdAt`, sandbox IDs) must never be in the schema, so a client can't set them. Use `.required({ field: true })` for columns that have a DB default but that the form must always send.
+- **Server actions live in `actions/<entity>.ts`** with `"use server"`. In each action, in this order:
+  1. `const { userId } = await auth.protect()` (Clerk). Take `userId` from the session, never from the input.
+  2. `safeParse` the input with the same schema. Server actions are public endpoints.
+  3. Write with Drizzle via `db` from `@/lib/db`, then `revalidatePath` the affected route.
+  4. Return `{ success: true, <entity> } | { success: false, error: string }`. Don't throw for validation errors.
+- **Store empty optional text as `null`** (`instruction: parsed.data.instruction || null`).
+- **Client forms use `react-hook-form` + `zodResolver(schema)`** in a `"use client"` component. Type values with `z.input<typeof schema>` and the submit handler with `z.output<typeof schema>`. Use a factory like `emptyBot()` for `defaultValues`, and reuse it in `form.reset()` after a successful submit.
+- **Render each field with `Controller` and shadcn `Field` components**: `FieldGroup` > `Field data-invalid={fieldState.invalid}` > `FieldLabel htmlFor` + control with `aria-invalid={fieldState.invalid}` + `{fieldState.invalid && <FieldError errors={[fieldState.error]} />}`. Nullable columns need `value={field.value ?? ""}` on the input.
+- **Submit with `useTransition`.** Call the action inside `startTransition`, disable the submit button while `isPending` and show `<Spinner data-icon="inline-start" />`. Report the result with `toast.add({ type, title })` from `@/components/ui/toast` (Base UI, not sonner).
+- **Forms in dialogs:** keep the dialog's open state controlled (`open`/`onOpenChange`) so it can close on success. Put `DialogHeader` outside the `<form>` and give the form `className="contents"`, so `DialogFooter` still lines up with the dialog edges. Cancel is `DialogClose render={<Button variant="outline" />}`, and every non-submit button inside the form needs `type="button"`.
+- **Server pages open client dialogs through a wrapper component** that renders its own `DialogTrigger render={<Button />}` and takes the trigger label as `children`. Keep the page a Server Component.
+
 ## DiceBear
 
 Use DiceBear 10. Documentation: https://www.dicebear.com/llms.txt
