@@ -8,7 +8,8 @@ import {
   type ChatStartSessionParams,
 } from "@trigger.dev/sdk/ai"
 
-import { getChat } from "@/queries/chats"
+import { getDesktopUrl } from "@/lib/daytona"
+import { getChat, getChatSandboxId } from "@/queries/chats"
 import type { chatAgent } from "@/trigger/chat"
 
 // chatId comes from the browser, so every action checks the signed-in user
@@ -43,4 +44,19 @@ const load = chat.createLoadTranscriptAction(defaultStorage)
 export async function loadTranscript(params: ChatLoadTranscriptParams) {
   await assertChatOwner(params.chatId)
   return load(params)
+}
+
+// The bot's desktop as a noVNC URL, for the desktop panel.
+export async function getChatDesktopUrl(
+  chatId: string
+): Promise<{ success: true; url: string } | { success: false; error: string }> {
+  const sandboxId = await getChatSandboxId(chatId)
+  if (!sandboxId) return { success: false, error: "Chat not found." }
+
+  try {
+    return { success: true, url: await getDesktopUrl(sandboxId) }
+  } catch (error) {
+    console.error(`Failed to open the desktop of sandbox ${sandboxId}`, error)
+    return { success: false, error: "Couldn't open the bot's desktop." }
+  }
 }

@@ -107,6 +107,7 @@ function BotDialog({
   open?: boolean
   onOpenChange?: (open: boolean) => void
 }) {
+  const router = useRouter()
   const [uncontrolledOpen, setUncontrolledOpen] = React.useState(false)
   const open = openProp ?? uncontrolledOpen
   const setOpenState = onOpenChange ?? setUncontrolledOpen
@@ -150,6 +151,7 @@ function BotDialog({
       toast.add({ type: "success", title: `${result.bot.name} is ready.` })
       setOpen(false)
       form.reset(emptyBot())
+      router.push(`/chats/${result.chat.id}`)
     })
   }
 

@@ -36,6 +36,12 @@ Reference implementation: `lib/db/schema.ts` (`insertBotSchema`), `actions/bot.t
 - **Forms in dialogs:** keep the dialog's open state controlled (`open`/`onOpenChange`) so it can close on success. Put `DialogHeader` outside the `<form>` and give the form `className="contents"`, so `DialogFooter` still lines up with the dialog edges. Cancel is `DialogClose render={<Button variant="outline" />}`, and every non-submit button inside the form needs `type="button"`.
 - **Server pages open client dialogs through a wrapper component** that renders its own `DialogTrigger render={<Button />}` and takes the trigger label as `children`. Keep the page a Server Component.
 
+## Deployment
+
+- The app deploys to Railway (project `ai-bot`, service `ai-bot`, environment `production`). Railway builds from a push to `main`.
+- When adding env variables, copy them from `.env.local` to the Railway service (`railway variable set KEY --stdin`), **except `TRIGGER_SECRET_KEY`**. Locally it's the Trigger.dev dev key (`tr_dev_…`). Railway needs the prod key (`tr_prod_…`), which is already set there. Never overwrite it with the local value.
+- Env variables that the Trigger.dev tasks use (in `trigger/`) also need to be set in the Trigger.dev dashboard for the prod environment, not only on Railway.
+
 ## DiceBear
 
 Use DiceBear 10. Documentation: https://www.dicebear.com/llms.txt

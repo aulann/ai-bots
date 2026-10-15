@@ -128,10 +128,15 @@ function ChatView({
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <Conversation className="min-h-0 flex-1">
-        <ConversationContent className="mx-auto w-full max-w-3xl">
+        <ConversationContent>
           {messages.map((message) => (
-            <Message from={message.role} key={message.id}>
-              <MessageContent>
+            <Message
+              from={message.role}
+              key={message.id}
+              // Full width, so screenshots can center in the chat.
+              className={message.role === "assistant" ? "max-w-full" : undefined}
+            >
+              <MessageContent className="group-[.is-assistant]:w-full">
                 {message.parts.map((part, i) => (
                   <MessagePart key={`${message.id}-${i}`} part={part} />
                 ))}
@@ -141,7 +146,7 @@ function ChatView({
         </ConversationContent>
         <ConversationScrollButton />
       </Conversation>
-      <div className="mx-auto w-full max-w-3xl px-4 pb-4">
+      <div className="px-4 pb-4">
         <PromptInput onSubmit={handleSubmit}>
           <PromptInputBody>
             <PromptInputTextarea placeholder="Message..." />
@@ -158,7 +163,13 @@ function ChatView({
 function MessagePart({ part }: { part: ChatPart }) {
   switch (part.type) {
     case "text":
-      return <MessageResponse>{part.text}</MessageResponse>
+      return (
+        // The user's bubble comes from MessageContent. The bot's goes on its
+        // text only, so screenshots and tool cards stay full width.
+        <div className="group-[.is-assistant]:w-fit group-[.is-assistant]:max-w-full group-[.is-assistant]:rounded-lg group-[.is-assistant]:bg-blue-500/15 group-[.is-assistant]:px-4 group-[.is-assistant]:py-3">
+          <MessageResponse>{part.text}</MessageResponse>
+        </div>
+      )
     case "tool-bash":
       return <BashTool part={part} />
     case "tool-readFile":
@@ -383,7 +394,7 @@ function ShowScreenTool({ part }: { part: ToolPart<"showScreen"> }) {
       <Image
         alt="The bot's screen"
         base64={part.output.data}
-        className="mb-4 border"
+        className="mx-auto mb-4 w-full max-w-xl border"
         mediaType={part.output.mediaType}
         uint8Array={new Uint8Array()}
       />
